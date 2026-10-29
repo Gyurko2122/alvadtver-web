@@ -123,6 +123,20 @@ h1 { font-size: 2.8rem; text-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
     transition: all 0.3s ease;
 }
 
+/* Zene gombok sor elrendezése */
+.music-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .music-row {
+        grid-template-columns: 1fr; /* Mobilon egymás alá esnek, hogy ne nyomódjanak össze */
+    }
+}
+
 .member-photo { 
     width: 100%; 
     height: 100%; 
