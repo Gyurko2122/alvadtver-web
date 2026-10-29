@@ -1,23 +1,3 @@
-// --- KONCERTEK FIGYELÉSE (Biztosíték, hogy mindig létezzen) ---
-if (typeof window.listenToUpcomingEvents === 'undefined') {
-    window.listenToUpcomingEvents = function(callback) {
-        if (typeof window.rtdb === 'undefined') {
-            window.rtdb = firebase.database();
-        }
-        window.rtdb.ref('events').on('value', (snapshot) => {
-            const data = snapshot.val();
-            const events = [];
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    events.push({ id: key, ...data[key] });
-                });
-            }
-            events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-            callback(events);
-        });
-    };
-}
-
 let countdownInterval = null;
 let latestEventsCache = [];
 
@@ -28,7 +8,7 @@ window.refreshMainEvents = function() {
 function renderEvents(events) {
     latestEventsCache = events;
     const container = document.getElementById('events-display');
-    const lang = typeof getLang === 'function' ? getLang() : 'hu';
+    const lang = typeof window.getLang === 'function' ? window.getLang() : 'hu';
     const dict = (typeof translations !== 'undefined' && translations[lang]) ? translations[lang] : {
         no_concerts: "Jelenleg nincsenek rögzített koncertek.",
         live_badge: "ÉLŐBEN!",
@@ -120,7 +100,9 @@ function getGoogleCalendarUrl(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.listenToUpcomingEvents((events) => { 
-        renderEvents(events); 
-    });
+    if (typeof window.listenToUpcomingEvents === 'function') {
+        window.listenToUpcomingEvents((events) => { 
+            renderEvents(events); 
+        });
+    }
 });
