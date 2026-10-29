@@ -126,9 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '';
         ['tomor', 'buzas', 'szabo', 'rozsa'].forEach(key => {
             const member = (data && data[key]) ? data[key] : defaults[key];
+            const imgUrl = (member.url && member.url.trim() !== '') ? member.url : defaults[key].url;
+            
             html += `
                 <div class="member-card">
-                    <img src="${member.url}" alt="${member.name}">
+                    <img src="${imgUrl}" alt="${member.name}" onerror="this.src='logo.png'">
                     <div class="member-name">${member.name}</div>
                     <div class="member-role">${member.role}</div>
                 </div>
