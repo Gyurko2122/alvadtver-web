@@ -97,14 +97,55 @@ h1 { font-size: 2.8rem; text-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
 .news-date { font-family: var(--font-head); font-size: 0.8rem; color: var(--bright-red); font-weight: bold; }
 .news-title { font-family: var(--font-head); font-size: 1.3rem; margin: 0.3rem 0; color: #fff; text-transform: uppercase; }
 .news-text { font-size: 0.85rem; color: var(--silver); }
-.band-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-.member-card { background: var(--card-bg); border: 1px solid var(--border-silver); border-radius: 4px; padding: 0.8rem; text-align: center; }
 
-/* TELJES KÉP MEGJELENÍTÉSE LEVÁGÁS NÉLKÜL */
-.member-card img { width: 100%; height: 180px; object-fit: contain; background-color: #080808; border-radius: 3px; margin-bottom: 0.5rem; filter: grayscale(30%); }
+/* BANDA SZEKCIÓ - HÁTTÉR NÉLKÜLI, TELJES KÉPES, VÉRES HOVER HATÁSSAL */
+.band-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 2rem; 
+    padding: 1rem 0;
+}
+.member-card { 
+    background: transparent; 
+    border: none; 
+    padding: 0; 
+    text-align: center; 
+    transition: transform 0.3s ease;
+}
+.member-card img { 
+    width: 100%; 
+    height: 300px; 
+    object-fit: cover; 
+    border-radius: 4px; 
+    border: 2px solid var(--border-silver);
+    background-color: transparent;
+    transition: all 0.3s ease;
+    filter: grayscale(25%);
+}
 
-.member-name { font-family: var(--font-head); font-size: 1.05rem; font-weight: bold; color: #fff; text-transform: uppercase; }
-.member-role { font-size: 0.75rem; color: var(--silver); }
+/* Hover esemény: Enyhe bemozdulás és véresen izzó, csöpögő hatású vörös keret */
+.member-card:hover img {
+    border-color: var(--bright-red);
+    filter: grayscale(0%);
+    box-shadow: 0 0 15px rgba(211, 47, 47, 0.9), 0 0 35px rgba(139, 0, 0, 0.7), inset 0 0 12px rgba(211, 47, 47, 0.6);
+    transform: scale(1.03) translateY(-3px);
+}
+
+.member-name { 
+    font-family: var(--font-head); 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    color: #fff; 
+    text-transform: uppercase; 
+    margin-top: 0.8rem;
+    letter-spacing: 1px;
+}
+.member-role { 
+    font-size: 0.85rem; 
+    color: var(--silver); 
+    text-transform: uppercase;
+    font-family: var(--font-head);
+}
 
 /* GALÉRIA ÉS RÁCS STÍLUSOK */
 .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-red); padding-bottom: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
@@ -224,6 +265,7 @@ footer a { color: var(--bright-red); text-decoration: none; font-weight: bold; }
     #lightbox-close { top: -40px; right: 5px; font-size: 35px; }
 }
 @media (max-width: 600px) {
+    .band-grid { grid-template-columns: 1fr; }
     .photo-grid { grid-template-columns: 1fr; }
     .gig-actions { flex-direction: column; }
     .btn { width: 100%; }
