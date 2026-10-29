@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<link lang="hu">
+<html lang="hu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,8 +17,8 @@
         </div>
     </nav>
 
-    <main class="gallery-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-        <h1 style="color: #fff; font-family: var(--font-head); margin-bottom: 1.5rem;">FOTÓGALÉRIA</h1>
+    <main class="gallery-container">
+        <h1>FOTÓGALÉRIA</h1>
         
         <!-- Itt jelennek meg a képek -->
         <div id="grid-view" class="photo-grid-container">
@@ -26,7 +26,7 @@
         </div>
     </main>
 
-    <!-- Lightbox Modális Ablak -->
+    <!-- Lightbox Modális Ablak (Smooth áttűnéssel, háttérre vagy X-re záródik) -->
     <div id="lightbox-modal" onclick="closeLightbox(event)">
         <div class="lightbox-content-wrapper" onclick="event.stopPropagation()">
             <span id="lightbox-close" onclick="closeLightboxDirect()">&times;</span>
