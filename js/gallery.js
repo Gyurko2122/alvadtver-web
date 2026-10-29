@@ -1,67 +1,102 @@
-import { getPhotos, getLang, translations } from './storage.js';
+// Biztonságos inicializálás
+if (typeof window.rtdb === 'undefined') {
+    window.rtdb = firebase.database();
+}
 
-let photos = [];
-let carouselIndex = 0;
+let allPhotos = [];
+let currentIndex = 0;
+let currentViewMode = 'grid';
 
-window.initGallery = function() {
-    getPhotos().then(data => {
-        photos = data;
-        const gridView = document.getElementById('grid-view');
-        const lang = getLang();
-        const dict = translations[lang];
+document.addEventListener('DOMContentLoaded', () => {
+    loadGalleryPhotos();
+});
 
-        if (!gridView) return;
-
-        if (photos.length === 0) {
-            gridView.innerHTML = `<div class="no-photos-msg" style="grid-column: 1 / -1;">${dict.gallery_empty}</div>`;
-            return;
+// Képek betöltése a Realtime Database-ből
+function loadGalleryPhotos() {
+    window.rtdb.ref('photos').on('value', (snapshot) => {
+        const data = snapshot.val();
+        allPhotos = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                allPhotos.push({ id: key, ...data[key] });
+            });
         }
-
-        gridView.innerHTML = photos.map(p => `
-            <div class="photo-card">
-                <img src="${p.url}" alt="${p.caption || 'AlvadtVér'}">
-                <div class="photo-desc">${p.caption || 'AlvadtVér'}</div>
-            </div>
-        `).join('');
-
-        updateCarousel();
+        renderGallery();
     });
-};
+}
 
+// Galéria kirajzolása (rács vagy diavetítő)
+function renderGallery() {
+    const gridView = document.getElementById('grid-view');
+    if (!gridView) return;
+
+    if (allPhotos.length === 0) {
+        gridView.innerHTML = `<p style="color: var(--silver); text-align: center; grid-column: 1 / -1; padding: 2rem;" data-i18n="gallery_empty">Még nincsenek feltöltött képek a galériában.</p>`;
+        return;
+    }
+
+    // Rács nézet HTML generálás
+    let gridHtml = '';
+    allPhotos.forEach((photo, index) => {
+        gridHtml += `
+            <div class="photo-item" onclick="openCarouselAt(${index})" style="cursor: pointer; background: #111; border: 1px solid #333; overflow: hidden;">
+                <img src="${photo.url}" alt="${photo.caption || 'Galéria kép'}" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                ${photo.caption ? `<div style="padding: 0.5rem; font-size: 0.85rem; color: var(--silver); text-align: center;">${photo.caption}</div>` : ''}
+            </div>
+        `;
+    });
+    gridView.innerHTML = gridHtml;
+
+    if (allPhotos.length > 0) {
+        updateCarouselImage();
+    }
+}
+
+// Nézet váltás (Rács / Diavetítő)
 window.switchView = function(mode) {
+    currentViewMode = mode;
     const gridView = document.getElementById('grid-view');
     const carouselView = document.getElementById('carousel-view');
     const btnGrid = document.getElementById('btn-grid');
     const btnCarousel = document.getElementById('btn-carousel');
 
     if (mode === 'grid') {
-        gridView.classList.add('active');
-        carouselView.classList.remove('active');
-        btnGrid.classList.add('active');
-        btnCarousel.classList.remove('active');
+        if (gridView) gridView.style.display = 'grid';
+        if (carouselView) carouselView.style.display = 'none';
+        if (btnGrid) btnGrid.classList.add('active');
+        if (btnCarousel) btnCarousel.classList.remove('active');
     } else {
-        gridView.classList.remove('active');
-        carouselView.classList.add('active');
-        btnGrid.classList.remove('active');
-        btnCarousel.classList.add('active');
+        if (gridView) gridView.style.display = 'none';
+        if (carouselView) carouselView.style.display = 'block';
+        if (btnGrid) btnGrid.classList.remove('active');
+        if (btnCarousel) btnCarousel.classList.add('active');
+        updateCarouselImage();
     }
 };
 
-function updateCarousel() {
-    if (photos.length === 0) return;
-    const photo = photos[carouselIndex];
-    const imgEl = document.getElementById('carousel-img');
-    const capEl = document.getElementById('carousel-caption');
-    if (imgEl) imgEl.src = photo.url;
-    if (capEl) capEl.innerText = `${photo.caption || 'AlvadtVér'} (${carouselIndex + 1} / ${photos.length})`;
-}
-
+// Diavetítő léptetése
 window.moveCarousel = function(direction) {
-    if (photos.length === 0) return;
-    carouselIndex += direction;
-    if (carouselIndex < 0) carouselIndex = photos.length - 1;
-    if (carouselIndex >= photos.length) carouselIndex = 0;
-    updateCarousel();
+    if (allPhotos.length === 0) return;
+    currentIndex += direction;
+    if (currentIndex < 0) {
+        currentIndex = allPhotos.length - 1;
+    } else if (currentIndex >= allPhotos.length) {
+        currentIndex = 0;
+    }
+    updateCarouselImage();
 };
 
-document.addEventListener('DOMContentLoaded', window.initGallery);
+window.openCarouselAt = function(index) {
+    currentIndex = index;
+    window.switchView('carousel');
+};
+
+function updateCarouselImage() {
+    const imgEl = document.getElementById('carousel-img');
+    const captionEl = document.getElementById('carousel-caption');
+    if (allPhotos.length === 0) return;
+
+    const currentPhoto = allPhotos[currentIndex];
+    if (imgEl) imgEl.src = currentPhoto.url;
+    if (captionEl) captionEl.innerText = currentPhoto.caption || '';
+}
