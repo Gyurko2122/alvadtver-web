@@ -107,16 +107,11 @@ const translations = {
 window.setLang = function(lang) {
     localStorage.setItem('alvadtver_lang', lang);
     
-    // Zene állapotának mentése nyelvváltás / újratöltés előtt
-    const aud = document.getElementById('bg-audio');
-    if (aud && !aud.paused) {
-        localStorage.setItem('alvadtver_is_playing', 'true');
-        localStorage.setItem('alvadtver_current_time', aud.currentTime);
-    } else {
-        localStorage.setItem('alvadtver_is_playing', 'false');
+    // Azonnali nyelvfrissítés újratöltés nélkül (a zene megszakítás nélkül szól tovább!)
+    applyTranslations();
+    if (typeof window.refreshMainEvents === 'function') {
+        window.refreshMainEvents();
     }
-    
-    location.reload();
 };
 
 window.getLang = function() {
@@ -300,12 +295,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.insertAdjacentHTML('beforeend', playerHtml);
     }
 
-    // 3. Zene adatok betöltése a Firebase-ből és állapot visszaállítása
+    // 3. Zene adatok betöltése a Firebase-ből
     window.rtdb.ref('settings/music').on('value', (snapshot) => {
         const musicData = snapshot.val();
         const audioEl = document.getElementById('bg-audio');
         const titleEl = document.getElementById('track-title');
-        const playBtn = document.getElementById('play-btn');
 
         if (musicData && audioEl && titleEl) {
             if (musicData.url) {
@@ -317,23 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleEl.innerText = musicData.title;
             }
             audioEl.volume = 0.2;
-
-            // Zeneállapot visszaállítása újratöltés / nyelvváltás után
-            const shouldPlay = localStorage.getItem('alvadtver_is_playing') === 'true';
-            const savedTime = localStorage.getItem('alvadtver_current_time');
-
-            if (savedTime) {
-                audioEl.currentTime = parseFloat(savedTime);
-                localStorage.removeItem('alvadtver_current_time');
-            }
-
-            if (shouldPlay) {
-                audioEl.play().then(() => {
-                    if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                }).catch(e => console.log("Lejátszási hiba:", e));
-                localStorage.setItem('alvadtver_is_playing', 'false');
-            }
-
         } else if (titleEl) {
             titleEl.innerText = "AlvadtVér - Nincs zene";
         }
