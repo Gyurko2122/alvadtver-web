@@ -99,7 +99,10 @@ h1 { font-size: 2.8rem; text-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
 .news-text { font-size: 0.85rem; color: var(--silver); }
 .band-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .member-card { background: var(--card-bg); border: 1px solid var(--border-silver); border-radius: 4px; padding: 0.8rem; text-align: center; }
-.member-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 3px; margin-bottom: 0.5rem; filter: grayscale(30%); }
+
+/* TELJES KÉP MEGJELENÍTÉSE LEVÁGÁS NÉLKÜL */
+.member-card img { width: 100%; height: 180px; object-fit: contain; background-color: #080808; border-radius: 3px; margin-bottom: 0.5rem; filter: grayscale(30%); }
+
 .member-name { font-family: var(--font-head); font-size: 1.05rem; font-weight: bold; color: #fff; text-transform: uppercase; }
 .member-role { font-size: 0.75rem; color: var(--silver); }
 
