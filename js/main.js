@@ -271,11 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
         followSection.insertAdjacentHTML('beforebegin', musicHtml);
     }
 
-    // 2. Lebegő zenelejátszó beszúrása (jobb lent, lekerekített, futó címmel)
+    // 2. Lebegő zenelejátszó beszúrása (autoplay attribútummal)
     if (!document.querySelector('.floating-player')) {
         const playerHtml = `
             <div class="floating-player">
-                <audio id="bg-audio" preload="auto" loop></audio>
+                <audio id="bg-audio" preload="auto" autoplay loop></audio>
                 <div class="player-info">
                     <div class="player-title-wrapper">
                         <span class="player-title" id="track-title">AlvadtVér - Töltés...</span>
@@ -290,11 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.insertAdjacentHTML('beforeend', playerHtml);
     }
 
-    // 3. Zene adatok betöltése a Firebase-ből (settings/music ág)
+    // 3. Zene adatok betöltése a Firebase-ből és automatikus indítási kísérlet
     window.rtdb.ref('settings/music').on('value', (snapshot) => {
         const musicData = snapshot.val();
         const audioEl = document.getElementById('bg-audio');
         const titleEl = document.getElementById('track-title');
+        const playBtn = document.getElementById('play-btn');
 
         if (musicData && audioEl && titleEl) {
             if (musicData.url) {
@@ -304,6 +305,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleEl.innerText = musicData.title;
             }
             audioEl.volume = 0.2;
+
+            // Kísérlet az automatikus elindításra
+            audioEl.play().then(() => {
+                if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            }).catch(e => {
+                console.log("A böngésző blokkolta az autoplayt, kattintás szükséges:", e);
+            });
+
         } else if (titleEl) {
             titleEl.innerText = "AlvadtVér - Nincs zene";
         }
