@@ -265,8 +265,20 @@ window.handleMusicSubmit = function(e) {
             }
         );
     } else {
-        // Csak címet frissít, ha nem töltött fel új fájlt
-        saveMusicToDB(null);
+        saveMusicYToDB(null);
+    }
+};
+
+// Jelenlegi zene törlése az adminból
+window.deleteCurrentMusic = function() {
+    if (confirm("Biztosan törölni szeretnéd a jelenlegi háttérzenét?")) {
+        window.rtdb.ref('settings/music').remove().then(() => {
+            alert("A zene sikeresen törölve lett a rendszerből!");
+            const titleInput = document.getElementById('music-title-input');
+            if (titleInput) titleInput.value = '';
+        }).catch((error) => {
+            alert("Hiba történt a törlés során: " + error.message);
+        });
     }
 };
 
@@ -279,7 +291,7 @@ window.deleteEvent = function(id) {
 
 window.deletePhoto = function(id, storagePath) {
     if (confirm("Biztosan törlöd ezt a képet a szerverről és az adatbázisból is?")) {
-        const dbDelete = window.rtdb.ref('photos/' + id).remove();
+        const dbDelete = window.rtdb.ref('photos/' + id).name ? window.rtdb.ref('photos/' + id).remove() : window.rtdb.ref('photos/' + id).remove();
         let storageDelete = Promise.resolve();
         if (storagePath) {
             storageDelete = firebase.storage().ref(storagePath).delete().catch(err => console.log("Storage törlési hiba:", err));
