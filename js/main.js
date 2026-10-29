@@ -106,12 +106,8 @@ const translations = {
 
 window.setLang = function(lang) {
     localStorage.setItem('alvadtver_lang', lang);
-    
-    // Azonnali nyelvfrissítés újratöltés nélkül (a zene megszakítás nélkül szól tovább!)
     applyTranslations();
-    if (typeof window.refreshMainEvents === 'function') {
-        window.refreshMainEvents();
-    }
+    loadAndRenderEvents();
 };
 
 window.getLang = function() {
@@ -134,33 +130,44 @@ function applyTranslations() {
     });
 }
 
-// --- KONCERTEK LOGIKA ÉS VISSZASZÁMLÁLÁS ---
+// --- KONCERTEK EGYSZERI BETÖLTÉSE (Nincs háttérfigyelés, nincs pattogás) ---
+let countdownInterval = null;
+
 window.listenToUpcomingEvents = function(callback) {
     if (typeof window.rtdb === 'undefined') {
         window.rtdb = firebase.database();
     }
-    window.rtdb.ref('events').on('value', (snapshot) => {
+    
+    // Egyszeri lekérés (.once), így a Firebase nem küld folyamatosan új adatokat, ami megállítja a villogást
+    window.rtdb.ref('events').once('value', (snapshot) => {
         const data = snapshot.val();
         const events = [];
+        const now = new Date();
+
         if (data) {
             Object.keys(data).forEach(key => {
-                events.push({ id: key, ...data[key] });
+                const event = data[key];
+                const startObj = new Date(event.datetime);
+                const endObj = event.endtime ? new Date(event.endtime) : new Date(startObj.getTime() + 3 * 60 * 60 * 1000);
+
+                if (now <= endObj) {
+                    events.push({ id: key, ...event });
+                }
             });
         }
+        
         events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
         callback(events);
     });
 };
 
-let countdownInterval = null;
-let latestEventsCache = [];
-
-window.refreshMainEvents = function() {
-    if (latestEventsCache.length > 0) renderEvents(latestEventsCache);
-};
+function loadAndRenderEvents() {
+    window.listenToUpcomingEvents((events) => {
+        renderEvents(events);
+    });
+}
 
 function renderEvents(events) {
-    latestEventsCache = events;
     const container = document.getElementById('events-display');
     const lang = window.getLang();
     const dict = translations[lang] || translations.hu;
@@ -169,36 +176,39 @@ function renderEvents(events) {
     if (!container) return;
 
     if (events.length === 0) {
-        container.innerHTML = `<div class="no-concerts-msg">${dict.no_concerts}</div>`;
+        container.innerHTML = `<div class="no-concerts-msg" style="padding: 2rem; text-align: center; color: var(--silver); background: var(--card-bg); border-radius: 4px; border: 1px solid var(--border-silver);">${dict.no_concerts}</div>`;
+        if (countdownInterval) clearInterval(countdownInterval);
         return;
     }
 
-    const now = new Date();
-    const first = events.find(e => now >= new Date(e.datetime) && now <= (e.endtime ? new Date(e.endtime) : new Date(new Date(e.datetime).getTime() + 3*60*60*1000))) || events[0];
-    
-    const startObj = new Date(first.datetime);
-    const endObj = first.endtime ? new Date(first.endtime) : new Date(startObj.getTime() + 3*60*60*1000);
-    const isLiveNow = now >= startObj && now <= endObj;
+    const first = events[0];
+    const second = events.length > 1 ? events[1] : null;
 
-    const dateFormatted = startObj.toLocaleString(locale, {
+    let html = '';
+    const now = new Date();
+    const startObj1 = new Date(first.datetime);
+    const endObj1 = first.endtime ? new Date(first.endtime) : new Date(startObj1.getTime() + 3 * 60 * 60 * 1000);
+    const isLiveNow1 = now >= startObj1 && now <= endObj1;
+    
+    const dateFormatted1 = startObj1.toLocaleString(locale, {
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit'
     });
 
-    let html = `
-        <div class="featured-gig ${isLiveNow ? 'live-now' : ''}">
-            ${isLiveNow ? `<div class="live-badge">${dict.live_badge}</div>` : `<span class="featured-badge">${dict.next_gig}</span>`}
+    html += `
+        <div class="featured-gig ${isLiveNow1 ? 'live-now' : ''}">
+            ${isLiveNow1 ? `<div class="live-badge">${dict.live_badge}</div>` : `<span class="featured-badge">${dict.next_gig}</span>`}
             <h3 class="gig-title">${first.title}</h3>
             <div class="gig-details">
                 <p>📍 <strong>${first.location}</strong></p>
-                <p>📅 <strong>${dateFormatted}</strong></p>
+                <p>📅 <strong>${dateFormatted1}</strong></p>
             </div>
-            ${!isLiveNow ? `
+            ${!isLiveNow1 ? `
             <div class="countdown">
                 <div class="count-box"><div id="cd-days" class="count-num">00</div><div class="count-label">${dict.days}</div></div>
                 <div class="count-box"><div id="cd-hours" class="count-num">00</div><div class="count-label">${dict.hours}</div></div>
                 <div class="count-box"><div id="cd-mins" class="count-num">00</div><div class="count-label">${dict.mins}</div></div>
                 <div class="count-box"><div id="cd-secs" class="count-num">00</div><div class="count-label">${dict.secs}</div></div>
-            </div>` : `<div style="margin: 1rem 0; font-family: var(--font-head); color: #00e676; font-size: 1.2rem; text-transform: uppercase;">A koncert jelenleg zajlik! / Live in progress!</div>`}
+            </div>` : `<div style="margin: 1rem 0; font-family: var(--font-head); color: #00e676; font-size: 1.2rem; text-transform: uppercase;">A koncert jelenleg zajlik!</div>`}
             
             <div class="gig-actions">
                 <a href="${getGoogleMapsUrl(first.location)}" target="_blank" class="btn btn-red">${dict.btn_map}</a>
@@ -207,28 +217,63 @@ function renderEvents(events) {
         </div>
     `;
 
+    if (second) {
+        const startObj2 = new Date(second.datetime);
+        const dateFormatted2 = startObj2.toLocaleString(locale, {
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        
+        html += `
+            <div class="small-gig-card" style="margin-top: 1rem;">
+                <span style="font-size: 0.75rem; color: var(--silver); text-transform: uppercase; letter-spacing: 1px;">Ezután következik</span>
+                <h4 style="font-family: var(--font-head); font-size: 1.1rem; color: #fff; margin: 0.4rem 0;">${second.title}</h4>
+                <div style="font-size: 0.85rem; color: var(--silver);">
+                    <p style="margin-bottom: 0.2rem;">📍 ${second.location}</p>
+                    <p>📅 ${dateFormatted2}</p>
+                </div>
+            </div>
+        `;
+    }
+
     container.innerHTML = html;
-    if (!isLiveNow) initCountdown(startObj.getTime());
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    if (!isLiveNow1) {
+        initCountdown(startObj1.getTime());
+    } else {
+        const timeUntilEnd = endObj1.getTime() - now.getTime();
+        countdownInterval = setTimeout(() => {
+            loadAndRenderEvents();
+        }, timeUntilEnd);
+    }
 }
 
 function initCountdown(targetTime) {
     if (countdownInterval) clearInterval(countdownInterval);
+    
     const update = () => {
         const now = new Date().getTime();
         const diff = targetTime - now;
+        
         if (diff <= 0) {
-            location.reload();
+            clearInterval(countdownInterval);
+            loadAndRenderEvents(); // Ha lejár, frissítünk
             return;
         }
+        
         const dEl = document.getElementById("cd-days");
         const hEl = document.getElementById("cd-hours");
         const mEl = document.getElementById("cd-mins");
         const sEl = document.getElementById("cd-secs");
+        
+        // Csak a számok értéke cserélődik, a DOM szerkezete nem épül újra, így nincs ugrálás!
         if (dEl) dEl.innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
         if (hEl) hEl.innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
         if (mEl) mEl.innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
         if (sEl) sEl.innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
     };
+    
     update();
     countdownInterval = setInterval(update, 1000);
 }
@@ -246,56 +291,13 @@ function getGoogleCalendarUrl(event) {
 // --- FŐ INICIALIZÁLÁS ÉS FIREBASE ADATOK ---
 document.addEventListener('DOMContentLoaded', () => {
     applyTranslations();
-
-    if (typeof window.listenToUpcomingEvents === 'function') {
-        window.listenToUpcomingEvents((events) => { 
-            renderEvents(events); 
-        });
-    }
+    loadAndRenderEvents();
 
     if (typeof window.rtdb === 'undefined') {
         window.rtdb = firebase.database();
     }
 
-    // 1. Hallgass minket sáv beszúrása a Kövess minket elé
-    const followSection = document.getElementById('kovess-minket');
-    if (followSection && !document.getElementById('hallgass-minket')) {
-        const musicHtml = `
-            <section id="hallgass-minket">
-                <h2 class="section-title">Hallgass minket</h2>
-                <div class="music-row">
-                    <a href="https://open.spotify.com/artist/0mADiAR7beqmT2fN31PEbh?si=JSRjSfr0TuGqxW6cBew-iQ" target="_blank" class="social-btn music-btn">
-                        <div class="social-left"><i class="fa-brands fa-spotify social-icon" style="color: #1DB954;"></i><span><b>Spotify</b><small>AlvadtVér</small></span></div><span>→</span>
-                    </a>
-                    <a href="https://www.youtube.com/@AlvadtV%C3%A9r" target="_blank" class="social-btn music-btn">
-                        <div class="social-left"><i class="fa-brands fa-youtube social-icon" style="color: #FF0000;"></i><span><b>YouTube</b><small>Hivatalos csatorna</small></span></div><span>→</span>
-                    </a>
-                </div>
-            </section>
-        `;
-        followSection.insertAdjacentHTML('beforebegin', musicHtml);
-    }
-
-    // 2. Lebegő zenelejátszó beszúrása
-    if (!document.querySelector('.floating-player')) {
-        const playerHtml = `
-            <div class="floating-player">
-                <audio id="bg-audio" preload="auto" loop></audio>
-                <div class="player-info">
-                    <div class="player-title-wrapper">
-                        <span class="player-title" id="track-title">AlvadtVér - Töltés...</span>
-                    </div>
-                </div>
-                <div class="player-controls">
-                    <button id="play-btn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.2" onchange="setVolume(this.value)">
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', playerHtml);
-    }
-
-    // 3. Zene adatok betöltése a Firebase-ből
+    // 1. Zene adatok betöltése a Firebase-ből
     window.rtdb.ref('settings/music').on('value', (snapshot) => {
         const musicData = snapshot.val();
         const audioEl = document.getElementById('bg-audio');
@@ -316,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 4. Zenekari tagok betöltése a Firebase-ből
+    // 2. Zenekari tagok betöltése a Firebase-ből
     window.rtdb.ref('members').on('value', (snapshot) => {
         const data = snapshot.val();
         const container = document.getElementById('band-grid-container');
@@ -340,8 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${imgUrl}" alt="${member.name}" class="member-photo" onerror="this.src='logo.png'">
                         <img src="border-uj.png" alt="Blood Border" class="blood-overlay">
                     </div>
-                    <div class="member-name">${member.name}</div>
-                    <div class="member-role">${member.role}</div>
+                    <div class="member-info">
+                        <div class="member-name">${member.name}</div>
+                        <div class="member-role">${member.role}</div>
+                    </div>
                 </div>
             `;
         });

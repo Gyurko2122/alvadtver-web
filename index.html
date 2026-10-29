@@ -50,7 +50,8 @@
                 <h2 class="section-title" data-i18n="title_concerts">Koncertek</h2>
                 <div id="events-display"></div>
             </section>
-<section id="hallgass-minket">
+
+            <section id="hallgass-minket">
                 <h2 class="section-title">Hallgass minket</h2>
                 <div class="music-row">
                     <a href="https://open.spotify.com/artist/0mADiAR7beqmT2fN31PEbh?si=JSRjSfr0TuGqxW6cBew-iQ" target="_blank" class="social-btn music-btn">
@@ -59,14 +60,15 @@
                     <a href="https://www.youtube.com/@AlvadtV%C3%A9r" target="_blank" class="social-btn music-btn">
                         <div class="social-left"><i class="fa-brands fa-youtube social-icon" style="color: #FF0000;"></i><span><b>YouTube</b><small>Hivatalos csatorna</small></span></div><span>→</span>
                     </a>
-                    <a href="https://alvadtver.bandcamp.com/track/moshpit" target="_blank" class="social-btn">
-                    <div class="social-left"><i class="fa-brands fa-bandcamp social-icon" style="color: white;"></i><span><b>Bandcamp</b><small>AlvadtVér</small></span></div><span>→</span>
+                    <a href="https://alvadtver.bandcamp.com/track/moshpit" target="_blank" class="social-btn music-btn">
+                        <div class="social-left"><i class="fa-brands fa-bandcamp social-icon" style="color: white;"></i><span><b>Bandcamp</b><small>AlvadtVér</small></span></div><span>→</span>
                     </a>
-                    <a href="https://soundcloud.com/alvadtver" target="_blank" class="social-btn">
-                    <div class="social-left"><i class="fa-brands fa-soundcloud social-icon" style="color: orange;"></i><span><b>Soundcloud</b><small>AlvadtVér</small></span></div><span>→</span>
+                    <a href="https://soundcloud.com/alvadtver" target="_blank" class="social-btn music-btn">
+                        <div class="social-left"><i class="fa-brands fa-soundcloud social-icon" style="color: orange;"></i><span><b>Soundcloud</b><small>AlvadtVér</small></span></div><span>→</span>
                     </a>
                 </div>
             </section>
+
             <section id="kovess-minket">
                 <h2 class="section-title" data-i18n="title_follow">Kövess minket</h2>
                 <div class="social-links">
@@ -82,7 +84,6 @@
                     <a href="mailto:alvadtverofficial@gmail.com" class="social-btn">
                         <div class="social-left"><i class="fa-solid fa-envelope social-icon"></i><span data-i18n="footer_book">Booking / E-mail</span></div><span>✉</span>
                     </a>
-                    
                 </div>
             </section>
 
@@ -96,15 +97,15 @@
 
         <div>
             <section id="hirek">
-    <h2 class="section-title" data-i18n="title_news">Hírek</h2>
-    <article class="news-card">
-        <div class="news-content">
-            <div class="news-date" data-i18n="news_date">2026. OKTÓBER 26.</div>
-            <h3 class="news-title" data-i18n="news_title">Elkészült az új weboldalunk!</h3>
-            <p class="news-text" data-i18n="news_text">Itt mindig megtaláljátok a legfrissebb koncertdátumokat, híreket és a fellépéseken készült fotókat. Tartsátok rajtunk a szemeteket!</p>
-        </div>
-    </article>
-</section>
+                <h2 class="section-title" data-i18n="title_news">Hírek</h2>
+                <article class="news-card">
+                    <div class="news-content">
+                        <div class="news-date" data-i18n="news_date">2026. OKTÓBER 26.</div>
+                        <h3 class="news-title" data-i18n="news_title">Elkészült az új weboldalunk!</h3>
+                        <p class="news-text" data-i18n="news_text">Itt mindig megtaláljátok a legfrissebb koncertdátumokat, híreket és a fellépéseken készült fotókat. Tartsátok rajtunk a szemeteket!</p>
+                    </div>
+                </article>
+            </section>
 
             <section id="banda">
                 <h2 class="section-title" data-i18n="title_band">A Banda</h2>
@@ -140,7 +141,7 @@
       firebase.initializeApp(firebaseConfig);
     </script>
 
-<!-- Lebegő zenelejátszó -->
+    <!-- Lebegő zenelejátszó -->
     <div class="floating-player">
         <audio id="bg-audio" src="zene.mp3" preload="auto" loop></audio>
         <div class="player-info">
@@ -151,8 +152,8 @@
             <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.2" onchange="setVolume(this.value)">
         </div>
     </div>
+
     <!-- Szkriptek -->
-    
     <script src="js/main.js?v=99"></script>
 </body>
 </html>
