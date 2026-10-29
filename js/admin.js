@@ -42,6 +42,7 @@ window.checkPass = function() {
 function loadAdminData() {
     loadAdminEvents();
     loadAdminPhotos();
+    loadAdminMembers();
 }
 
 async function loadAdminEvents() {
@@ -69,7 +70,7 @@ async function loadAdminEvents() {
     listEl.innerHTML = html;
 }
 
-// Kép feltöltése a saját gépről a Firebase Storage-ba
+// Kép feltöltése a saját gépről a Firebase Storage-ba (Galéria)
 window.handlePhotoSubmit = function(e) {
     e.preventDefault();
     const fileInput = document.getElementById('ph-file');
@@ -84,15 +85,11 @@ window.handlePhotoSubmit = function(e) {
     const caption = captionInput.value;
     const fileName = 'galeria_' + Date.now() + '_' + file.name;
     
-    // Feltöltés a Firebase Storage /galeria/ mappájába
     const storageRef = firebase.storage().ref('galeria/' + fileName);
     const uploadTask = storageRef.put(file);
 
-    uploadTask.on('state_changed', 
-        null, 
-        (error) => {
-            alert("Hiba történt a feltöltés során: " + error.message);
-        }, 
+    uploadTask.on('state_changed', null, 
+        (error) => { alert("Hiba történt a feltöltés során: " + error.message); }, 
         () => {
             uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                 const id = 'ph_' + Date.now();
@@ -137,6 +134,84 @@ async function loadAdminPhotos() {
     });
     listEl.innerHTML = html;
 }
+
+// Zenekari tagok betöltése, mentése és törlése az adminban
+function loadAdminMembers() {
+    const listEl = document.getElementById('members-list');
+    if (!listEl) return;
+
+    window.rtdb.ref('members').once('value').then((snapshot) => {
+        const data = snapshot.val();
+        let html = '<h3>Mentett Tagok:</h3>';
+
+        if (!data) {
+            listEl.innerHTML = html + '<p style="color:var(--silver); font-size:0.8rem;">Még nincsenek testreszabott tagok (az alapértelmezettek jelennek meg).</p>';
+            return;
+        }
+
+        Object.keys(data).forEach(id => {
+            const m = data[id];
+            html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:0.5rem; margin-bottom:0.5rem; border:1px solid #333;">
+                    <div style="display:flex; align-items:center; gap: 10px;">
+                        ${m.url ? `<img src="${m.url}" style="width: 40px; height: 40px; object-fit: cover;">` : ''}
+                        <span><b>${m.name}</b> - ${m.role}</span>
+                    </div>
+                    <button onclick="deleteMember('${id}')" style="background:#ff5252; color:white; border:none; padding:0.3rem 0.6rem; cursor:pointer;">Törlés</button>
+                </div>
+            `;
+        });
+        listEl.innerHTML = html;
+    });
+}
+
+window.handleMemberSubmit = function(e) {
+    e.preventDefault();
+    const memberId = document.getElementById('m-id').value;
+    const name = document.getElementById('m-name').value;
+    const role = document.getElementById('m-role').value;
+    const fileInput = document.getElementById('m-file');
+
+    const saveData = (imageUrl, storagePath) => {
+        const payload = { name, role };
+        if (imageUrl) {
+            payload.url = imageUrl;
+            payload.storagePath = storagePath;
+        }
+
+        window.rtdb.ref('members/' + memberId).update(payload).then(() => {
+            alert("Zenekari tag adatai sikeresen mentve!");
+            loadAdminMembers();
+        });
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const fileName = 'member_' + memberId + '_' + Date.now() + '_' + file.name;
+        const storageRef = firebase.storage().ref('members/' + fileName);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', null, 
+            (error) => { alert("Hiba a kép feltöltésekor: " + error.message); },
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    saveData(downloadURL, 'members/' + fileName);
+                });
+            }
+        );
+    } else {
+        saveData(null, null);
+    }
+};
+
+window.deleteMember = function(id) {
+    if (confirm("Biztosan törlöd ezt a tagot a rendszerből?")) {
+        window.rtdb.ref('members/' + id).remove().then(() => {
+            alert("Tag törölve!");
+            loadAdminMembers();
+        });
+    }
+};
 
 // Koncert mentés
 window.handleEventSubmit = function(e) {

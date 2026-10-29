@@ -99,10 +99,41 @@ function getGoogleCalendarUrl(event) {
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&location=${encodeURIComponent(event.location)}`;
 }
 
+// Banda tagok dinamikus betöltése Firebase-ből
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.listenToUpcomingEvents === 'function') {
         window.listenToUpcomingEvents((events) => { 
             renderEvents(events); 
         });
     }
+
+    if (typeof window.rtdb === 'undefined') {
+        window.rtdb = firebase.database();
+    }
+    
+    window.rtdb.ref('members').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('band-grid-container');
+        if (!container) return;
+
+        const defaults = {
+            tomor: { name: "Tomor Nimród", role: "Ének / Basszusgitár", url: "tomor.jpg" },
+            buzas: { name: "Buzás Ádám", role: "Gitár", url: "buzas.jpg" },
+            szabo: { name: "Szabó Martin", role: "Gitár", url: "szabo.jpg" },
+            rozsa: { name: "Rózsa Dániel", role: "Dob", url: "rozsa.jpg" }
+        };
+
+        let html = '';
+        ['tomor', 'buzas', 'szabo', 'rozsa'].forEach(key => {
+            const member = (data && data[key]) ? data[key] : defaults[key];
+            html += `
+                <div class="member-card">
+                    <img src="${member.url}" alt="${member.name}">
+                    <div class="member-name">${member.name}</div>
+                    <div class="member-role">${member.role}</div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    });
 });

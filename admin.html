@@ -31,6 +31,33 @@
         </form>
         <div style="margin-top: 1rem;" class="item-list" id="events-list"></div>
 
+        <h2>Zenekari Tagok Szerkesztése</h2>
+        <form onsubmit="handleMemberSubmit(event)">
+            <div class="form-group">
+                <label>Tag Kiválasztása / Azonosító</label>
+                <select id="m-id" required style="width: 100%; padding: 0.7rem; background: #080808; border: 1px solid var(--border-admin); color: #fff; border-radius: 4px; font-size: 0.95rem;">
+                    <option value="tomor">Tomor Nimród (Ének / Basszusgitár)</option>
+                    <option value="buzas">Buzás Ádám (Gitár)</option>
+                    <option value="szabo">Szabó Martin (Gitár)</option>
+                    <option value="rozsa">Rózsa Dániel (Dob)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tag Neve</label>
+                <input type="text" id="m-name" required placeholder="Pl. Szabó Martin">
+            </div>
+            <div class="form-group">
+                <label>Milyen hangszeren / szerepben játszik</label>
+                <input type="text" id="m-role" required placeholder="Pl. Gitár">
+            </div>
+            <div class="form-group">
+                <label>Tag Fotója (Új kép a gépről)</label>
+                <input type="file" id="m-file" accept="image/*" style="color: white; background: #111; padding: 0.5rem; border: 1px solid #333; width: 100%;">
+            </div>
+            <button type="submit" class="btn-save">Tag Mentése / Frissítése</button>
+        </form>
+        <div style="margin-top: 1rem;" class="item-list" id="members-list"></div>
+
         <h2>Fotó Feltöltése a Rendszerbe</h2>
         <form onsubmit="handlePhotoSubmit(event)">
             <div class="form-group">
