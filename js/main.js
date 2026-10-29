@@ -130,7 +130,7 @@ function applyTranslations() {
     });
 }
 
-// --- KONCERTEK EGYSZERI BETÖLTÉSE (Nincs háttérfigyelés, nincs pattogás) ---
+// --- KONCERTEK EGYSZERI BETÖLTÉSE ÉS AUTOMATIKUS TISZTÍTÁSA (Adminból is töröl) ---
 let countdownInterval = null;
 
 window.listenToUpcomingEvents = function(callback) {
@@ -138,7 +138,7 @@ window.listenToUpcomingEvents = function(callback) {
         window.rtdb = firebase.database();
     }
     
-    // Egyszeri lekérés (.once), így a Firebase nem küld folyamatosan új adatokat, ami megállítja a villogást
+    // Egyszeri lekérés (.once), ami nem okoz végtelen hurkot, de a lejártat törli az adatbázisból is!
     window.rtdb.ref('events').once('value', (snapshot) => {
         const data = snapshot.val();
         const events = [];
@@ -150,7 +150,10 @@ window.listenToUpcomingEvents = function(callback) {
                 const startObj = new Date(event.datetime);
                 const endObj = event.endtime ? new Date(event.endtime) : new Date(startObj.getTime() + 3 * 60 * 60 * 1000);
 
-                if (now <= endObj) {
+                // Ha lejárt, töröljük a Firebase-ből is, hogy az admin panelből is eltűnjön
+                if (now > endObj) {
+                    window.rtdb.ref('events/' + key).remove();
+                } else {
                     events.push({ id: key, ...event });
                 }
             });
@@ -258,7 +261,7 @@ function initCountdown(targetTime) {
         
         if (diff <= 0) {
             clearInterval(countdownInterval);
-            loadAndRenderEvents(); // Ha lejár, frissítünk
+            loadAndRenderEvents(); // Ha lejár, frissítünk és törlünk
             return;
         }
         
@@ -267,7 +270,6 @@ function initCountdown(targetTime) {
         const mEl = document.getElementById("cd-mins");
         const sEl = document.getElementById("cd-secs");
         
-        // Csak a számok értéke cserélődik, a DOM szerkezete nem épül újra, így nincs ugrálás!
         if (dEl) dEl.innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
         if (hEl) hEl.innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
         if (mEl) mEl.innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
