@@ -17,7 +17,7 @@ function renderEvents(events) {
     if (!container) return;
 
     if (events.length === 0) {
-        container.innerHTML = `<div class="no-concerts-msg">${dict.no_concerts}</div>`;
+        container.innerHTML = `<div class="no-concerts-msg" data-i18n="no_concerts">${dict.no_concerts}</div>`;
         return;
     }
 
