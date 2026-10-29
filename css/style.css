@@ -98,7 +98,7 @@ h1 { font-size: 2.8rem; text-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
 .news-title { font-family: var(--font-head); font-size: 1.3rem; margin: 0.3rem 0; color: #fff; text-transform: uppercase; }
 .news-text { font-size: 0.85rem; color: var(--silver); }
 
-/* BANDA SZEKCIÓ - HÁTTÉR NÉLKÜLI, RESZPONZÍV ÉS VÉRES BORDER OVERLAY */
+/* BANDA SZEKCIÓ - TISZTA, HIBAMENTES VÖRÖS/VÉRES HOVER KÉPESSÉGGEL */
 .band-grid { 
     display: grid; 
     grid-template-columns: repeat(2, 1fr); 
@@ -129,33 +129,16 @@ h1 { font-size: 2.8rem; text-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
     filter: grayscale(25%);
     display: block;
 }
-.blood-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    transform: scale(1.05);
-    mix-blend-mode: multiply;
-    filter: contrast(150%);
-}
 
-/* Hover esemény: elindul a vér, vörös ragyogás és bemozdulás */
+/* Hover esemény: gyönyörű, véresen vörös keret és izzás kitakarás nélkül */
 .member-card:hover .member-img-wrapper {
     border-color: var(--bright-red);
-    box-shadow: 0 0 20px rgba(211, 47, 47, 0.9);
+    box-shadow: 0 0 15px rgba(211, 47, 47, 0.9), 0 0 30px rgba(139, 0, 0, 0.7), inset 0 0 15px rgba(211, 47, 47, 0.5);
+    transform: translateY(-3px);
 }
 .member-card:hover .member-photo {
-    transform: scale(1.03) translateY(-2px);
+    transform: scale(1.03);
     filter: grayscale(0%);
-}
-.member-card:hover .blood-overlay {
-    opacity: 1;
-    transform: scale(1);
 }
 
 .member-name { 
@@ -294,7 +277,7 @@ footer a { color: var(--bright-red); text-decoration: none; font-weight: bold; }
 @media (max-width: 600px) {
     .band-grid { grid-template-columns: 1fr; }
     .photo-grid { grid-template-columns: 1fr; }
-    .gig-actions { flex-direction: column; }
+    .gig-actions { flex-direction: graph; flex-direction: column; }
     .btn { width: 100%; }
     .list-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 }
