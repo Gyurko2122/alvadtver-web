@@ -1,3 +1,23 @@
+// --- KONCERTEK FIGYELÉSE (Biztosíték, hogy mindig létezzen) ---
+if (typeof window.listenToUpcomingEvents === 'undefined') {
+    window.listenToUpcomingEvents = function(callback) {
+        if (typeof window.rtdb === 'undefined') {
+            window.rtdb = firebase.database();
+        }
+        window.rtdb.ref('events').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const events = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    events.push({ id: key, ...data[key] });
+                });
+            }
+            events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            callback(events);
+        });
+    };
+}
+
 let countdownInterval = null;
 let latestEventsCache = [];
 
@@ -8,14 +28,24 @@ window.refreshMainEvents = function() {
 function renderEvents(events) {
     latestEventsCache = events;
     const container = document.getElementById('events-display');
-    const lang = getLang();
-    const dict = translations[lang];
+    const lang = typeof getLang === 'function' ? getLang() : 'hu';
+    const dict = (typeof translations !== 'undefined' && translations[lang]) ? translations[lang] : {
+        no_concerts: "Jelenleg nincsenek rögzített koncertek.",
+        live_badge: "ÉLŐBEN!",
+        next_gig: "Következő Koncert",
+        days: "Nap",
+        hours: "Óra",
+        mins: "Perc",
+        secs: "Mp",
+        btn_map: "Helyszín (Google Maps)",
+        btn_calendar: "Mentés Naptárba"
+    };
     let locale = lang === 'hu' ? 'hu-HU' : (lang === 'de' ? 'de-DE' : 'en-US');
 
     if (!container) return;
 
     if (events.length === 0) {
-        container.innerHTML = `<div class="no-concerts-msg" data-i18n="no_concerts">${dict.no_concerts}</div>`;
+        container.innerHTML = `<div class="no-concerts-msg">${dict.no_concerts}</div>`;
         return;
     }
 
@@ -79,6 +109,18 @@ function initCountdown(targetTime) {
     countdownInterval = setInterval(update, 1000);
 }
 
+function getGoogleMapsUrl(location) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+}
+
+function getGoogleCalendarUrl(event) {
+    const start = new Date(event.datetime).toISOString().replace(/-|:|\.\d\d\d/g,"");
+    const end = event.endtime ? new Date(event.endtime).toISOString().replace(/-|:|\.\d\d\d/g,"") : start;
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&location=${encodeURIComponent(event.location)}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    listenToUpcomingEvents((events) => { renderEvents(events); });
+    window.listenToUpcomingEvents((events) => { 
+        renderEvents(events); 
+    });
 });
