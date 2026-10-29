@@ -1,5 +1,5 @@
-let countdownInterval = null;
-let latestEventsCache = [];
+var countdownInterval = null;
+var latestEventsCache = [];
 
 window.refreshMainEvents = function() {
     if (latestEventsCache.length > 0) renderEvents(latestEventsCache);
