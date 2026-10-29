@@ -175,7 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             html += `
                 <div class="member-card">
-                    <img src="${imgUrl}" alt="${member.name}" onerror="this.src='logo.png'">
+                    <div class="member-img-wrapper">
+                        <img src="${imgUrl}" alt="${member.name}" class="member-photo" onerror="this.src='logo.png'">
+                        <img src="border.jpg" alt="Blood Border" class="blood-overlay">
+                    </div>
                     <div class="member-name">${member.name}</div>
                     <div class="member-role">${member.role}</div>
                 </div>
