@@ -1,5 +1,3 @@
-import { listenToUpcomingEvents, getLang, translations, getGoogleMapsUrl, getGoogleCalendarUrl } from './storage.js';
-
 let countdownInterval = null;
 let latestEventsCache = [];
 
