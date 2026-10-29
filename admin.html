@@ -72,6 +72,19 @@
         </form>
         <div style="margin-top: 1rem;" class="item-list" id="photos-list"></div>
 
+        <h2>Háttérzene Beállítása</h2>
+        <form onsubmit="handleMusicSubmit(event)">
+            <div class="form-group">
+                <label>Zene Címe (ami a lebegő lejátszóban fut)</label>
+                <input type="text" id="music-title-input" placeholder="Pl. AlvadtVér - Új Dal (Demo)" required>
+            </div>
+            <div class="form-group">
+                <label>MP3 Fájl Feltöltése a Gépről</label>
+                <input type="file" id="music-file-input" accept="audio/mp3,audio/*" style="color: white; background: #111; padding: 0.5rem; border: 1px solid #333; width: 100%;">
+            </div>
+            <button type="submit" class="btn-save">Zene Mentése és Feltöltése</button>
+        </form>
+
         <div style="text-align: center; margin-top: 2rem;">
             <a href="index.html" style="color: var(--silver); text-decoration: none;">← Vissza a főoldalra</a>
         </div>

@@ -133,6 +133,17 @@
       firebase.initializeApp(firebaseConfig);
     </script>
 
+<!-- Lebegő zenelejátszó -->
+    <div class="floating-player">
+        <audio id="bg-audio" src="zene.mp3" preload="auto" loop></audio>
+        <div class="player-info">
+            <span class="player-title" id="track-title">AlvadtVér - Háttérzene</span>
+        </div>
+        <div class="player-controls">
+            <button id="play-btn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.2" onchange="setVolume(this.value)">
+        </div>
+    </div>
     <!-- Szkriptek -->
     
     <script src="js/main.js?v=99"></script>

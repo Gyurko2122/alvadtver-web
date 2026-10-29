@@ -238,7 +238,7 @@ function getGoogleCalendarUrl(event) {
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&location=${encodeURIComponent(event.location)}`;
 }
 
-// --- ZENEKARI TAGOK BETÖLTÉSE ÉS KIRAJZOLÁSA ---
+// --- FŐ INICIALIZÁLÁS ÉS FIREBASE ADATOK ---
 document.addEventListener('DOMContentLoaded', () => {
     applyTranslations();
 
@@ -252,6 +252,64 @@ document.addEventListener('DOMContentLoaded', () => {
         window.rtdb = firebase.database();
     }
 
+    // 1. Hallgass minket sáv beszúrása a Kövess minket elé
+    const followSection = document.getElementById('kovess-minket');
+    if (followSection && !document.getElementById('hallgass-minket')) {
+        const musicHtml = `
+            <section id="hallgass-minket">
+                <h2 class="section-title">Hallgass minket</h2>
+                <div class="music-row">
+                    <a href="https://open.spotify.com/artist/0mADiAR7beqmT2fN31PEbh?si=JSRjSfr0TuGqxW6cBew-iQ" target="_blank" class="social-btn music-btn">
+                        <div class="social-left"><i class="fa-brands fa-spotify social-icon" style="color: #1DB954;"></i><span><b>Spotify</b><small>AlvadtVér</small></span></div><span>→</span>
+                    </a>
+                    <a href="https://www.youtube.com/@AlvadtV%C3%A9r" target="_blank" class="social-btn music-btn">
+                        <div class="social-left"><i class="fa-brands fa-youtube social-icon" style="color: #FF0000;"></i><span><b>YouTube</b><small>Hivatalos csatorna</small></span></div><span>→</span>
+                    </a>
+                </div>
+            </section>
+        `;
+        followSection.insertAdjacentHTML('beforebegin', musicHtml);
+    }
+
+    // 2. Lebegő zenelejátszó beszúrása (jobb lent, lekerekített, futó címmel)
+    if (!document.querySelector('.floating-player')) {
+        const playerHtml = `
+            <div class="floating-player">
+                <audio id="bg-audio" preload="auto" loop></audio>
+                <div class="player-info">
+                    <div class="player-title-wrapper">
+                        <span class="player-title" id="track-title">AlvadtVér - Töltés...</span>
+                    </div>
+                </div>
+                <div class="player-controls">
+                    <button id="play-btn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.2" onchange="setVolume(this.value)">
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', playerHtml);
+    }
+
+    // 3. Zene adatok betöltése a Firebase-ből (settings/music ág)
+    window.rtdb.ref('settings/music').on('value', (snapshot) => {
+        const musicData = snapshot.val();
+        const audioEl = document.getElementById('bg-audio');
+        const titleEl = document.getElementById('track-title');
+
+        if (musicData && audioEl && titleEl) {
+            if (musicData.url) {
+                audioEl.src = musicData.url;
+            }
+            if (musicData.title) {
+                titleEl.innerText = musicData.title;
+            }
+            audioEl.volume = 0.2;
+        } else if (titleEl) {
+            titleEl.innerText = "AlvadtVér - Nincs zene";
+        }
+    });
+
+    // 4. Zenekari tagok betöltése a Firebase-ből
     window.rtdb.ref('members').on('value', (snapshot) => {
         const data = snapshot.val();
         const container = document.getElementById('band-grid-container');
@@ -283,3 +341,26 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     });
 });
+
+// --- LEBEGŐ ZENELEJÁTSZÓ VEZÉRLÉSE ---
+function togglePlay() {
+    const playBtn = document.getElementById('play-btn');
+    const aud = document.getElementById('bg-audio');
+    if (!aud || !aud.src) return;
+    
+    if (aud.paused) {
+        aud.play().then(() => {
+            playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        }).catch(e => console.log("Lejátszási hiba:", e));
+    } else {
+        aud.pause();
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    }
+}
+
+function setVolume(val) {
+    const aud = document.getElementById('bg-audio');
+    if (aud) {
+        aud.volume = val;
+    }
+}

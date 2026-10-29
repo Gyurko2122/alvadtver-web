@@ -294,6 +294,85 @@ input:focus { border-color: var(--bright-red); outline: none; }
 footer { border-top: 1px solid var(--border-silver); padding: 2rem; text-align: center; color: var(--silver); font-size: 0.85rem; margin-top: 3rem; background: #060606; }
 footer a { color: var(--bright-red); text-decoration: none; font-weight: bold; }
 
+
+
+/* Lebegő zenelejátszó stílusa */
+.floating-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0f0f0f;
+    border: 1px solid var(--border-silver);
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 9999;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.9);
+    font-family: var(--font-head);
+    max-width: 280px;
+}
+
+.player-info {
+    overflow: hidden;
+    width: 130px;
+}
+
+.player-title-wrapper {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.player-title {
+    color: #fff;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    display: inline-block;
+    animation: marquee 8s linear infinite;
+}
+
+/* Gördülő (scrollolós) animáció, ha hosszú a szám címe */
+@keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#play-btn {
+    background: var(--bright-red);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+#play-btn:hover {
+    background: #ff1a1a;
+    box-shadow: 0 0 10px rgba(211, 47, 47, 0.9);
+}
+
+#volume-slider {
+    width: 60px;
+    accent-color: var(--bright-red);
+    cursor: pointer;
+}
+
+
+
+
 /* RESZPONZÍV MEDIA QUERYK */
 @media (max-width: 850px) {
     .main-container { grid-template-columns: 1fr; gap: 1.5rem; }

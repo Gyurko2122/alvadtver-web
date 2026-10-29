@@ -1,4 +1,4 @@
-// Biztonságos inicializálás
+// --- BIZTONSÁGOS INICIALIZÁLÁS ---
 if (typeof window.rtdb === 'undefined') {
     window.rtdb = firebase.database();
 }
@@ -229,6 +229,45 @@ window.handleEventSubmit = function(e) {
         e.target.reset();
         loadAdminEvents();
     });
+};
+
+// --- HÁTTÉRZENE FELTÖLTÉSE ÉS MENTÉSE (ADMIN) ---
+window.handleMusicSubmit = function(e) {
+    e.preventDefault();
+    const titleInput = document.getElementById('music-title-input').value;
+    const fileInput = document.getElementById('music-file-input');
+
+    const saveMusicToDB = (url) => {
+        const payload = { title: titleInput };
+        if (url) {
+            payload.url = url;
+        }
+        window.rtdb.ref('settings/music').update(payload).then(() => {
+            alert("Zene sikeresen frissítve!");
+            e.target.reset();
+        }).catch(err => {
+            alert("Hiba az adatbázis mentésekor: " + err.message);
+        });
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const fileName = 'music_' + Date.now() + '_' + file.name;
+        const storageRef = firebase.storage().ref('music/' + fileName);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', null,
+            (error) => { alert("Hiba az MP3 feltöltésekor: " + error.message); },
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    saveMusicToDB(downloadURL);
+                });
+            }
+        );
+    } else {
+        // Csak címet frissít, ha nem töltött fel új fájlt
+        saveMusicToDB(null);
+    }
 };
 
 // Törlések (Adatbázis + Storage)
