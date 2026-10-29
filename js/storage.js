@@ -104,17 +104,17 @@ const translations = {
     }
 };
 
-function setLang(lang) {
+window.setLang = function(lang) {
     localStorage.setItem('alvadtver_lang', lang);
     location.reload();
-}
+};
 
-function getLang() {
+window.getLang = function() {
     return localStorage.getItem('alvadtver_lang') || 'hu';
-}
+};
 
 function applyTranslations() {
-    const lang = getLang();
+    const lang = window.getLang();
     const dict = translations[lang];
     if (!dict) return;
 
@@ -133,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTranslations();
 });
 
-// --- KONCERTEK KEZELÉSE ---
-function listenToUpcomingEvents(callback) {
+// --- KONCERTEK FIGYELÉSE ---
+window.listenToUpcomingEvents = function(callback) {
     if (typeof window.rtdb === 'undefined') {
         window.rtdb = firebase.database();
     }
@@ -149,14 +149,4 @@ function listenToUpcomingEvents(callback) {
         events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
         callback(events);
     });
-}
-
-function getGoogleMapsUrl(location) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
-}
-
-function getGoogleCalendarUrl(event) {
-    const start = new Date(event.datetime).toISOString().replace(/-|:|\.\d\d\d/g,"");
-    const end = event.endtime ? new Date(event.endtime).toISOString().replace(/-|:|\.\d\d\d/g,"") : start;
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&location=${encodeURIComponent(event.location)}`;
-}
+};
