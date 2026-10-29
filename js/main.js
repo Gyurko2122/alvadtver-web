@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="member-card">
                     <div class="member-img-wrapper">
                         <img src="${imgUrl}" alt="${member.name}" class="member-photo" onerror="this.src='logo.png'">
-                        <img src="border.png?v=2" alt="Blood Border" class="blood-overlay">
+                        <img src="border-uj.png" alt="Blood Border" class="blood-overlay">
                     </div>
                     <div class="member-name">${member.name}</div>
                     <div class="member-role">${member.role}</div>
