@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlvadtVér - Official Website</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="ticker-bar">
+        <div class="ticker-content">
+            <div class="ticker-item"><span data-i18n="ticker_1">ALVADTVÉR: AJKAI UNDERGROUND METAL</span></div>
+            <div class="ticker-item"><span data-i18n="ticker_2">ÚJ FOTÓK: KERESD A GALÉRIÁBAN</span></div>
+            <div class="ticker-item"><span data-i18n="ticker_3">BOOKING: ALVADTVEROFFICIAL@GMAIL.COM</span></div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="logo.png" alt="AlvadtVér" class="nav-logo"></a>
+            <ul class="nav-links">
+                <li><a href="#koncertek" data-i18n="nav_concerts">Koncertek</a></li>
+                <li><a href="#hirek" data-i18n="nav_news">Hírek</a></li>
+                <li><a href="#banda" data-i18n="nav_band">A Banda</a></li>
+                <li><a href="galeria.html" data-i18n="nav_gallery">Galéria</a></li>
+                <li><a href="#rolunk" data-i18n="nav_about">Rólunk</a></li>
+                
+                <li class="lang-dropdown">
+                    <button class="lang-btn"><span id="current-lang-text">HUN</span> ⏷</button>
+                    <div class="lang-content">
+                        <a href="#" onclick="setLang('hu'); return false;">HUN</a>
+                        <a href="#" onclick="setLang('en'); return false;">ENG</a>
+                        <a href="#" onclick="setLang('de'); return false;">GER</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <img src="logo.png" alt="AlvadtVér" class="hero-logo">
+        <p data-i18n="hero_sub">AJKAI UNDERGROUND METAL</p>
+    </header>
+
+    <main class="main-container">
+        <div>
+            <section id="koncertek">
+                <h2 class="section-title" data-i18n="title_concerts">Koncertek</h2>
+                <div id="events-display"></div>
+            </section>
+
+            <section id="kovess-minket">
+                <h2 class="section-title" data-i18n="title_follow">Kövess minket</h2>
+                <div class="social-links">
+                    <a href="https://tiktok.com/@alvadtver" target="_blank" class="social-btn">
+                        <div class="social-left"><i class="fa-brands fa-tiktok social-icon"></i><span><b>TikTok</b><small>@alvadtver</small></span></div><span>→</span>
+                    </a>
+                    <a href="https://instagram.com/alvadtver" target="_blank" class="social-btn">
+                        <div class="social-left"><i class="fa-brands fa-instagram social-icon"></i><span><b>Instagram</b><small>@alvadtver</small></span></div><span>→</span>
+                    </a>
+                    <a href="https://facebook.com/AlvadtVer" target="_blank" class="social-btn">
+                        <div class="social-left"><i class="fa-brands fa-facebook social-icon"></i><span><b>Facebook</b><small>AlvadtVér</small></span></div><span>→</span>
+                    </a>
+                    <a href="mailto:alvadtverofficial@gmail.com" class="social-btn">
+                        <div class="social-left"><i class="fa-solid fa-envelope social-icon"></i><span data-i18n="footer_book">Booking / E-mail</span></div><span>✉</span>
+                    </a>
+                </div>
+            </section>
+
+            <section id="rolunk">
+                <h2 class="section-title" data-i18n="title_about">Rólunk</h2>
+                <p style="color: var(--silver); font-size: 0.9rem;" data-i18n="about_text">
+                    Üdvözlünk az AlvadtVér hivatalos oldalán! Mi egy ajkai alapítású metálzenekar vagyunk. Célunk, hogy nyers energiát és kompromisszummentes zenét hozzunk a színpadra.
+                </p>
+            </section>
+        </div>
+
+        <div>
+            <section id="hirek">
+                <h2 class="section-title" data-i18n="title_news">Hírek</h2>
+                <article class="news-card">
+                    <img src="banda.jpg" alt="AlvadtVér koncert">
+                    <div class="news-content">
+                        <div class="news-date" data-i18n="news_date">2026. OKTÓBER 26.</div>
+                        <h3 class="news-title" data-i18n="news_title">Elkészült az új weboldalunk!</h3>
+                        <p class="news-text" data-i18n="news_text">Itt mindig megtaláljátok a legfrissebb koncertdátumokat, híreket és a fellépéseken készült fotókat. Tartsátok rajtunk a szemeteket!</p>
+                    </div>
+                </article>
+            </section>
+
+            <section id="banda">
+                <h2 class="section-title" data-i18n="title_band">A Banda</h2>
+                <div class="band-grid">
+                    <div class="member-card">
+                        <img src="tomor.jpg" alt="Tomor Nimród">
+                        <div class="member-name">Tomor Nimród</div>
+                        <div class="member-role" data-i18n="role_voc_bass">Ének / Basszusgitár</div>
+                    </div>
+                    <div class="member-card">
+                        <img src="buzas.jpg" alt="Buzás Ádám">
+                        <div class="member-name">Buzás Ádám</div>
+                        <div class="member-role" data-i18n="role_gui">Gitár</div>
+                    </div>
+                    <div class="member-card">
+                        <img src="szabo.jpg" alt="Szabó Martin">
+                        <div class="member-name">Szabó Martin</div>
+                        <div class="member-role" data-i18n="role_gui">Gitár</div>
+                    </div>
+                    <div class="member-card">
+                        <img src="rozsa.jpg" alt="Rózsa Dániel">
+                        <div class="member-name">Rózsa Dániel</div>
+                        <div class="member-role" data-i18n="role_drum">Dob</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p><span data-i18n="footer_book">Kapcsolat / Booking:</span> <a href="mailto:alvadtverofficial@gmail.com">alvadtverofficial@gmail.com</a></p>
+        <p style="margin-top: 0.5rem;" data-i18n="footer_rights">© 2026 AlvadtVér. Minden jog fenntartva.</p>
+    </footer>
+
+    <!-- Modulként hívjuk meg a main.js-t -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

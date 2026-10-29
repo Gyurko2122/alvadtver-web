@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotógaléria - AlvadtVér</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <a href="index.html"><img src="logo.png" alt="AlvadtVér" class="nav-logo"></a>
+            <div style="display:flex; align-items:center;">
+                <a href="index.html" class="back-btn" data-i18n="gallery_back">← Vissza a főoldalra</a>
+                <div class="lang-dropdown">
+                    <button class="lang-btn"><span id="current-lang-text">HUN</span> ⏷</button>
+                    <div class="lang-content">
+                        <a href="#" onclick="setLang('hu'); return false;">HUN</a>
+                        <a href="#" onclick="setLang('en'); return false;">ENG</a>
+                        <a href="#" onclick="setLang('de'); return false;">GER</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="gallery-container">
+        <div class="header-flex">
+            <h1 data-i18n="gallery_title">Fotógaléria</h1>
+            <div class="view-toggle">
+                <button class="toggle-btn active" id="btn-grid" onclick="switchView('grid')" data-i18n="gallery_grid">📷 Rács Nézet</button>
+                <button class="toggle-btn" id="btn-carousel" onclick="switchView('carousel')" data-i18n="gallery_carousel">🎞️ Diavetítő</button>
+            </div>
+        </div>
+
+        <div id="grid-view" class="photo-grid active"></div>
+
+        <div id="carousel-view" class="carousel-section">
+            <div class="carousel-stage">
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)">❮</button>
+                <img id="carousel-img" src="" alt="Galéria kép">
+                <button class="carousel-btn next" onclick="moveCarousel(1)">❯</button>
+            </div>
+            <div class="carousel-caption" id="carousel-caption"></div>
+        </div>
+    </main>
+
+    <script type="module" src="js/gallery.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - AlvadtVér</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="login-modal" class="login-overlay">
+        <div class="login-card" style="text-align: center;">
+            <h2 style="margin-top:0;">ADMIN BELÉPÉS</h2>
+            <div class="form-group"><input type="email" id="admin-email" placeholder="Admin E-mail" required></div>
+            <div class="form-group"><input type="password" id="admin-pass" placeholder="Jelszó" required></div>
+            <button onclick="checkPass()" class="btn-save">Belépés</button>
+            <p id="login-err" style="color: #ff5252; font-size: 0.8rem; margin-top: 0.5rem; display: none;">Hibás adatok!</p>
+        </div>
+    </div>
+
+    <div class="admin-box">
+        <h1>AlvadtVér Adminisztráció</h1>
+
+        <h2>Koncert Hozzáadása</h2>
+        <form onsubmit="handleEventSubmit(event)">
+            <div class="form-group"><label>Esemény Címe</label><input type="text" id="ev-title" required></div>
+            <div class="form-group"><label>Helyszín</label><input type="text" id="ev-location" required></div>
+            <div class="form-group"><label>Kezdő Dátum és Időpont</label><input type="datetime-local" id="ev-datetime" required></div>
+            <div class="form-group"><label>Záró (Vége) Dátum és Időpont</label><input type="datetime-local" id="ev-endtime" required></div>
+            <button type="submit" class="btn-save">+ Koncert Mentése</button>
+        </form>
+        <div style="margin-top: 1rem;" class="item-list" id="events-list"></div>
+
+        <h2>Fotó Feltöltése</h2>
+        <form onsubmit="handlePhotoSubmit(event)">
+            <div class="form-group"><label>Kép Útvonal (pl. kepek/foto1.jpg)</label><input type="text" id="ph-url" required></div>
+            <div class="form-group"><label>Leírás / Cím</label><input type="text" id="ph-caption"></div>
+            <button type="submit" class="btn-save">+ Kép Hozzáadása</button>
+        </form>
+        <div style="margin-top: 1rem;" class="item-list" id="photos-list"></div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="index.html" style="color: var(--silver); text-decoration: none;">← Vissza a főoldalra</a>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
