@@ -1,25 +1,10 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, set, remove, get } from "firebase/database";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-
-const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
-};
-
-const app = initializeApp(firebaseConfig);
-export const rtdb = getDatabase(app);
-export const auth = getAuth(app);
-export const LANG_STORAGE_KEY = 'alvadtver_lang';
+// Firebase példányosítás a globális CDN objektumokból
+const rtdb = firebase.database();
+const auth = firebase.auth();
+const LANG_STORAGE_KEY = 'alvadtver_lang';
 
 // NYELVI SZÓTÁR (i18n)
-export const translations = {
+const translations = {
     hu: {
         nav_concerts: "Koncertek", nav_news: "Hírek", nav_band: "A Banda", nav_gallery: "Galéria", nav_about: "Rólunk",
         hero_sub: "AJKAI UNDERGROUND METAL",
@@ -63,25 +48,26 @@ export const translations = {
         days: "Tage", hours: "Std", mins: "Min", secs: "Sek",
         about_text: "Willkommen auf der offiziellen AlvadtVér Website! Wir sind eine Metal-Band aus Ajka. Unser Ziel ist es, rohe Energie und kompromisslose Musik auf die Bühne zu bringen.",
         news_date: "26. OKTOBER 2026", news_title: "Unsere neue Website ist online!", news_text: "Hier findet ihr immer unsere neuesten Konzerttermine, Neuigkeiten und Live-Fotos. Behaltet uns im Auge!",
-        role_voc_bass: "Gesang / Bass", role_gui: "Gitarre", role_drum: "Schlagzeug",
+        role_voc_bass: "Gesang / Gesang/Bass", role_gui: "Gitarre", role_drum: "Schlagzeug",
         footer_book: "Kontakt / Booking:", footer_rights: "© 2026 AlvadtVér. Alle Rechte vorbehalten.",
         lang_hu: "HUN", lang_en: "ENG", lang_de: "GER",
         gallery_title: "Fotogalerie", gallery_back: "← Zurück zur Startseite", gallery_grid: "📷 Rasteransicht", gallery_carousel: "🎞️ Diashow", gallery_empty: "Noch keine Bilder in der Galerie hochgeladen."
     }
 };
 
-export function getLang() { 
+function getLang() { 
     return localStorage.getItem(LANG_STORAGE_KEY) || 'hu'; 
 }
 
-export function setLang(langCode) {
+// Globálisan elérhetővé tesszük a setLang-ot, hogy a HTML gombok működjenek
+window.setLang = function(langCode) {
     localStorage.setItem(LANG_STORAGE_KEY, langCode);
     applyTranslations();
-    if (typeof window.refreshMainEvents === 'function') window.refreshMainEvents();
-    if (typeof window.initGallery === 'function') window.initGallery();
-}
+    if (typeof refreshMainEvents === 'function') refreshMainEvents();
+    if (typeof initGallery === 'function') initGallery();
+};
 
-export function applyTranslations() {
+function applyTranslations() {
     const lang = getLang();
     const dict = translations[lang];
     if (!dict) return;
@@ -94,15 +80,11 @@ export function applyTranslations() {
     if (langLabel) langLabel.innerText = dict['lang_' + lang];
 }
 
-// Globálissá tesszük a setLang-ot, hogy a HTML-beli onclick="setLang(...)" gombok elérjék!
-window.setLang = setLang;
-
 document.addEventListener('DOMContentLoaded', applyTranslations);
 
 // --- REALTIME DB FÜGGVÉNYEK ---
-export function listenToUpcomingEvents(callback) {
-    const eventsRef = ref(rtdb, 'events');
-    onValue(eventsRef, (snapshot) => {
+function listenToUpcomingEvents(callback) {
+    rtdb.ref('events').on('value', (snapshot) => {
         const data = snapshot.val();
         let events = [];
         if (data) {
@@ -119,45 +101,45 @@ export function listenToUpcomingEvents(callback) {
     });
 }
 
-export async function getAdminEvents() {
-    const snapshot = await get(ref(rtdb, 'events'));
+async function getAdminEvents() {
+    const snapshot = await rtdb.ref('events').once('value');
     const data = snapshot.val();
     let events = [];
     if (data) { Object.keys(data).forEach(key => { events.push({ id: key, ...data[key] }); }); }
     return events;
 }
 
-export function saveEventToCloud(eventData) { 
-    return set(ref(rtdb, 'events/' + eventData.id), eventData); 
+function saveEventToCloud(eventData) { 
+    return rtdb.ref('events/' + eventData.id).set(eventData); 
 }
 
-export function deleteEventFromCloud(id) { 
-    return remove(ref(rtdb, 'events/' + id)); 
+function deleteEventFromCloud(id) { 
+    return rtdb.ref('events/' + id).remove(); 
 }
 
-export async function getPhotos() {
-    const snapshot = await get(ref(rtdb, 'photos'));
+async function getPhotos() {
+    const snapshot = await rtdb.ref('photos').once('value');
     const data = snapshot.val();
     let photos = [];
     if (data) { Object.keys(data).forEach(key => { photos.push({ id: key, ...data[key] }); }); }
     return photos;
 }
 
-export function savePhotoToCloud(photoData) { 
-    return set(ref(rtdb, 'photos/' + photoData.id), photoData); 
+function savePhotoToCloud(photoData) { 
+    return rtdb.ref('photos/' + photoData.id).set(photoData); 
 }
 
-export function deletePhotoFromCloud(id) { 
-    return remove(ref(rtdb, 'photos/' + id)); 
+function deletePhotoFromCloud(id) { 
+    return rtdb.ref('photos/' + id).remove(); 
 }
 
-export function getGoogleCalendarUrl(ev) {
+function getGoogleCalendarUrl(ev) {
     const s = new Date(ev.datetime); 
     const e = ev.endtime ? new Date(ev.endtime) : new Date(s.getTime() + 3 * 60 * 60 * 1000);
     const f = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
     return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`AlvadtVér - ${ev.title}`)}&dates=${f(s)}/${f(e)}&details=${encodeURIComponent(ev.location)}&location=${encodeURIComponent(ev.location)}`;
 }
 
-export function getGoogleMapsUrl(loc) { 
+function getGoogleMapsUrl(loc) { 
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`; 
 }

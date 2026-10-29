@@ -46,6 +46,28 @@
         </div>
     </main>
 
-    <script type="module" src="js/gallery.js"></script>
+    <!-- Firebase SDK-k -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Firebase Konfiguráció -->
+    <script>
+      const firebaseConfig = {
+          apiKey: "AIzaSyAVFxiuOIZXOx5DRAbDykL3_S6STiH-neE",
+          authDomain: "alvadtver-31459.firebaseapp.com",
+          databaseURL: "https://alvadtver-31459-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "alvadtver-31459",
+          storageBucket: "alvadtver-31459.firebasestorage.app",
+          messagingSenderId: "1089192306168",
+          appId: "1:1089192306168:web:4a7d203da057675362a20d",
+          measurementId: "G-01N71N6M4C"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <!-- Hagyományos script betöltés -->
+    <script src="js/storage.js"></script>
+    <script src="js/gallery.js"></script>
 </body>
 </html>
