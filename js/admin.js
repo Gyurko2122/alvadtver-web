@@ -156,7 +156,7 @@ window.handleEventSubmit = function(e) {
     });
 };
 
-// Törlések
+// Törlések (Adatbázis + Storage)
 window.deleteEvent = function(id) {
     if (confirm("Biztosan törlöd ezt a koncertet?")) {
         window.rtdb.ref('events/' + id).remove().then(() => { loadAdminEvents(); });
@@ -164,14 +164,14 @@ window.deleteEvent = function(id) {
 };
 
 window.deletePhoto = function(id, storagePath) {
-    if (confirm("Biztosan törlöd ezt a képet?")) {
+    if (confirm("Biztosan törlöd ezt a képet a szerverről és az adatbázisból is?")) {
         const dbDelete = window.rtdb.ref('photos/' + id).remove();
         let storageDelete = Promise.resolve();
         if (storagePath) {
-            storageDelete = firebase.storage().ref(storagePath).delete().catch(err => console.log(err));
+            storageDelete = firebase.storage().ref(storagePath).delete().catch(err => console.log("Storage törlési hiba:", err));
         }
         Promise.all([dbDelete, storageDelete]).then(() => {
-            alert("Kép törölve!");
+            alert("Kép sikeresen törölve mindenhol!");
             loadAdminPhotos();
         });
     }
