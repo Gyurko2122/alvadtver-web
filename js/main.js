@@ -106,6 +106,16 @@ const translations = {
 
 window.setLang = function(lang) {
     localStorage.setItem('alvadtver_lang', lang);
+    
+    // Zene állapotának mentése nyelvváltás / újratöltés előtt
+    const aud = document.getElementById('bg-audio');
+    if (aud && !aud.paused) {
+        localStorage.setItem('alvadtver_is_playing', 'true');
+        localStorage.setItem('alvadtver_current_time', aud.currentTime);
+    } else {
+        localStorage.setItem('alvadtver_is_playing', 'false');
+    }
+    
     location.reload();
 };
 
@@ -271,11 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
         followSection.insertAdjacentHTML('beforebegin', musicHtml);
     }
 
-    // 2. Lebegő zenelejátszó beszúrása (autoplay attribútummal)
+    // 2. Lebegő zenelejátszó beszúrása
     if (!document.querySelector('.floating-player')) {
         const playerHtml = `
             <div class="floating-player">
-                <audio id="bg-audio" preload="auto" autoplay loop></audio>
+                <audio id="bg-audio" preload="auto" loop></audio>
                 <div class="player-info">
                     <div class="player-title-wrapper">
                         <span class="player-title" id="track-title">AlvadtVér - Töltés...</span>
@@ -290,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.insertAdjacentHTML('beforeend', playerHtml);
     }
 
-    // 3. Zene adatok betöltése a Firebase-ből és automatikus indítási kísérlet
+    // 3. Zene adatok betöltése a Firebase-ből és állapot visszaállítása
     window.rtdb.ref('settings/music').on('value', (snapshot) => {
         const musicData = snapshot.val();
         const audioEl = document.getElementById('bg-audio');
@@ -299,19 +309,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (musicData && audioEl && titleEl) {
             if (musicData.url) {
-                audioEl.src = musicData.url;
+                if (audioEl.src !== musicData.url) {
+                    audioEl.src = musicData.url;
+                }
             }
             if (musicData.title) {
                 titleEl.innerText = musicData.title;
             }
             audioEl.volume = 0.2;
 
-            // Kísérlet az automatikus elindításra
-            audioEl.play().then(() => {
-                if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            }).catch(e => {
-                console.log("A böngésző blokkolta az autoplayt, kattintás szükséges:", e);
-            });
+            // Zeneállapot visszaállítása újratöltés / nyelvváltás után
+            const shouldPlay = localStorage.getItem('alvadtver_is_playing') === 'true';
+            const savedTime = localStorage.getItem('alvadtver_current_time');
+
+            if (savedTime) {
+                audioEl.currentTime = parseFloat(savedTime);
+                localStorage.removeItem('alvadtver_current_time');
+            }
+
+            if (shouldPlay) {
+                audioEl.play().then(() => {
+                    if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                }).catch(e => console.log("Lejátszási hiba:", e));
+                localStorage.setItem('alvadtver_is_playing', 'false');
+            }
 
         } else if (titleEl) {
             titleEl.innerText = "AlvadtVér - Nincs zene";
