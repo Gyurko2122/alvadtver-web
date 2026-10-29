@@ -1,4 +1,4 @@
-// Biztonságos inicializálás, hogy ne legyen redeclaration hiba
+// Biztonságos inicializálás
 if (typeof window.rtdb === 'undefined') {
     window.rtdb = firebase.database();
 }
@@ -6,7 +6,7 @@ if (typeof window.auth === 'undefined') {
     window.auth = firebase.auth();
 }
 
-// Ellenőrizzük, hogy be van-e már lépve, vagy mutassuk a modalt
+// Ellenőrizzük a belépést
 document.addEventListener('DOMContentLoaded', () => {
     window.auth.onAuthStateChanged((user) => {
         const modal = document.getElementById('login-modal');
@@ -19,19 +19,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Admin belépés ellenőrzése (globálisan elérhetővé téve)
+// Admin belépés
 window.checkPass = function() {
     const email = document.getElementById('admin-email').value;
     const pass = document.getElementById('admin-pass').value;
     const errEl = document.getElementById('login-err');
 
     window.auth.signInWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
+        .then(() => {
             const modal = document.getElementById('login-modal');
             if (modal) modal.style.display = 'none';
             loadAdminData();
         })
-        .catch((error) => {
+        .catch(() => {
             if (errEl) {
                 errEl.style.display = 'block';
                 errEl.innerText = "Hibás e-mail vagy jelszó!";
@@ -39,8 +39,7 @@ window.checkPass = function() {
         });
 };
 
-// Admin adatok betöltése
-async function loadAdminData() {
+function loadAdminData() {
     loadAdminEvents();
     loadAdminPhotos();
 }
@@ -70,6 +69,47 @@ async function loadAdminEvents() {
     listEl.innerHTML = html;
 }
 
+// Kép feltöltése a saját gépről a Firebase Storage-ba
+window.handlePhotoSubmit = function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('ph-file');
+    const captionInput = document.getElementById('ph-caption');
+    
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Kérlek válassz ki egy képet!");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const caption = captionInput.value;
+    const fileName = 'galeria_' + Date.now() + '_' + file.name;
+    
+    // Feltöltés a Firebase Storage /galeria/ mappájába
+    const storageRef = firebase.storage().ref('galeria/' + fileName);
+    const uploadTask = storageRef.put(file);
+
+    uploadTask.on('state_changed', 
+        null, 
+        (error) => {
+            alert("Hiba történt a feltöltés során: " + error.message);
+        }, 
+        () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                const id = 'ph_' + Date.now();
+                window.rtdb.ref('photos/' + id).set({
+                    url: downloadURL,
+                    caption: caption,
+                    storagePath: 'galeria/' + fileName
+                }).then(() => {
+                    alert("Kép sikeresen feltöltve!");
+                    e.target.reset();
+                    loadAdminPhotos();
+                });
+            });
+        }
+    );
+};
+
 async function loadAdminPhotos() {
     const listEl = document.getElementById('photos-list');
     if (!listEl) return;
@@ -87,8 +127,11 @@ async function loadAdminPhotos() {
         const ph = data[id];
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:0.5rem; margin-bottom:0.5rem; border:1px solid #333;">
-                <span><b>${ph.caption || 'Kép'}</b> (${ph.url})</span>
-                <button onclick="deletePhoto('${id}')" style="background:#ff5252; color:white; border:none; padding:0.3rem 0.6rem; cursor:pointer;">Törlés</button>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <img src="${ph.url}" style="width: 40px; height: 40px; object-fit: cover;">
+                    <span><b>${ph.caption || 'Kép'}</b></span>
+                </div>
+                <button onclick="deletePhoto('${id}', '${ph.storagePath || ''}')" style="background:#ff5252; color:white; border:none; padding:0.3rem 0.6rem; cursor:pointer;">Törlés</button>
             </div>
         `;
     });
@@ -113,22 +156,6 @@ window.handleEventSubmit = function(e) {
     });
 };
 
-// Kép mentés
-window.handlePhotoSubmit = function(e) {
-    e.preventDefault();
-    const url = document.getElementById('ph-url').value;
-    const caption = document.getElementById('ph-caption').value;
-    const id = 'ph_' + Date.now();
-
-    window.rtdb.ref('photos/' + id).set({
-        url, caption
-    }).then(() => {
-        alert("Kép sikeresen hozzáadva!");
-        e.target.reset();
-        loadAdminPhotos();
-    });
-};
-
 // Törlések
 window.deleteEvent = function(id) {
     if (confirm("Biztosan törlöd ezt a koncertet?")) {
@@ -136,8 +163,16 @@ window.deleteEvent = function(id) {
     }
 };
 
-window.deletePhoto = function(id) {
+window.deletePhoto = function(id, storagePath) {
     if (confirm("Biztosan törlöd ezt a képet?")) {
-        window.rtdb.ref('photos/' + id).remove().then(() => { loadAdminPhotos(); });
+        const dbDelete = window.rtdb.ref('photos/' + id).remove();
+        let storageDelete = Promise.resolve();
+        if (storagePath) {
+            storageDelete = firebase.storage().ref(storagePath).delete().catch(err => console.log(err));
+        }
+        Promise.all([dbDelete, storageDelete]).then(() => {
+            alert("Kép törölve!");
+            loadAdminPhotos();
+        });
     }
 };
