@@ -18,8 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(data).forEach(key => {
             const photo = data[key];
             if (photo && photo.url) {
+                // Biztonságos szövegkezelés az idézőjelekhez
+                const safeUrl = photo.url.replace(/'/g, "\\'");
+                const safeCaption = (photo.caption || '').replace(/'/g, "\\'");
+
                 html += `
-                    <div class="photo-card" onclick="openLightbox('${photo.url}', '${photo.caption || ''}')">
+                    <div class="photo-card" onclick="openLightbox('${safeUrl}', '${safeCaption}')">
                         <img src="${photo.url}" alt="Galéria kép">
                         <div class="photo-caption">${photo.caption || ''}</div>
                     </div>
@@ -39,13 +43,21 @@ window.openLightbox = function(url, caption) {
     if (modal && img) {
         img.src = url;
         cap.innerText = caption;
-        modal.style.display = 'flex';
+        modal.classList.add('active'); // Bekapcsolja a smooth animációt
     }
 };
 
-window.closeLightbox = function() {
+window.closeLightbox = function(event) {
+    // Ha a háttérre kattintanak (nem a kép tartalmára), bezáródik
     const modal = document.getElementById('lightbox-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('active'); // Lefuttatja a smooth eltűnést
+    }
+};
+
+window.closeLightboxDirect = function() {
+    const modal = document.getElementById('lightbox-modal');
+    if (modal) {
+        modal.classList.remove('active');
     }
 };
