@@ -6,7 +6,40 @@
     <title>Fotógaléria - AlvadtVér</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Modális felugró ablak a kép nagyításhoz */
+        .photo-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+            width: 100%;
+        }
+        .photo-card {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .photo-card:hover {
+            transform: scale(1.02);
+            border-color: var(--red, #ff5252);
+        }
+        .photo-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            cursor: pointer;
+        }
+        .photo-caption {
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            font-family: var(--font-head);
+            font-size: 1rem;
+        }
+        /* Lightbox nagyító */
         #lightbox-modal {
             display: none;
             position: fixed;
@@ -24,14 +57,11 @@
             max-width: 90%;
             max-height: 80vh;
             border: 2px solid var(--red, #ff5252);
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
         #lightbox-caption {
             color: #fff;
             margin-top: 1rem;
-            font-family: var(--font-head);
             font-size: 1.2rem;
-            text-align: center;
         }
         #lightbox-close {
             position: absolute;
@@ -39,11 +69,7 @@
             right: 30px;
             color: #fff;
             font-size: 40px;
-            font-weight: bold;
             cursor: pointer;
-        }
-        #lightbox-close:hover {
-            color: var(--red, #ff5252);
         }
     </style>
 </head>
@@ -53,28 +79,18 @@
         <div class="nav-container">
             <a href="index.html"><img src="logo.png" alt="AlvadtVér" class="nav-logo"></a>
             <div style="display:flex; align-items:center;">
-                <a href="index.html" class="back-btn" data-i18n="gallery_back">← Vissza a főoldalra</a>
-                <div class="lang-dropdown">
-                    <button class="lang-btn"><span id="current-lang-text">HUN</span> ⏷</button>
-                    <div class="lang-content">
-                        <a href="#" onclick="setLang('hu'); return false;">HUN</a>
-                        <a href="#" onclick="setLang('en'); return false;">ENG</a>
-                        <a href="#" onclick="setLang('de'); return false;">GER</a>
-                    </div>
-                </div>
+                <a href="index.html" class="back-btn">← Vissza a főoldalra</a>
             </div>
         </div>
     </nav>
 
-    <main class="gallery-container">
-        <div class="header-flex">
-            <h1 data-i18n="gallery_title">Fotógaléria</h1>
-            <div class="view-toggle">
-                <!-- Most már csak rács nézet van, gombok nélkül vagy egyszerűsítve -->
-            </div>
+    <main class="gallery-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+        <h1 style="color: #fff; font-family: var(--font-head); margin-bottom: 1.5rem;">FOTÓGALÉRIA</h1>
+        
+        <!-- Itt jelennek meg a képek -->
+        <div id="grid-view" class="photo-grid-container">
+            <p style="color: var(--silver); text-align: center; grid-column: 1 / -1;">Képek betöltése...</p>
         </div>
-
-        <div id="grid-view" class="photo-grid"></div>
     </main>
 
     <!-- Nagyító Modális Ablak -->
@@ -105,7 +121,7 @@
       firebase.initializeApp(firebaseConfig);
     </script>
 
-    
+    <!-- Galéria logikai script -->
     <script src="js/gallery.js"></script>
 </body>
 </html>
