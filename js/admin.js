@@ -1,10 +1,14 @@
-// Firebase példányosítás a globális CDN-ből
-const rtdb = firebase.database();
-const auth = firebase.auth();
+// Biztonságos inicializálás, hogy ne legyen redeclaration hiba
+if (typeof window.rtdb === 'undefined') {
+    window.rtdb = firebase.database();
+}
+if (typeof window.auth === 'undefined') {
+    window.auth = firebase.auth();
+}
 
 // Ellenőrizzük, hogy be van-e már lépve, vagy mutassuk a modalt
 document.addEventListener('DOMContentLoaded', () => {
-    auth.onAuthStateChanged((user) => {
+    window.auth.onAuthStateChanged((user) => {
         const modal = document.getElementById('login-modal');
         if (user) {
             if (modal) modal.style.display = 'none';
@@ -15,13 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Admin belépés ellenőrzése
-function checkPass() {
+// Admin belépés ellenőrzése (globálisan elérhetővé téve)
+window.checkPass = function() {
     const email = document.getElementById('admin-email').value;
     const pass = document.getElementById('admin-pass').value;
     const errEl = document.getElementById('login-err');
 
-    auth.signInWithEmailAndPassword(email, pass)
+    window.auth.signInWithEmailAndPassword(email, pass)
         .then((userCredential) => {
             const modal = document.getElementById('login-modal');
             if (modal) modal.style.display = 'none';
@@ -33,9 +37,9 @@ function checkPass() {
                 errEl.innerText = "Hibás e-mail vagy jelszó!";
             }
         });
-}
+};
 
-// Admin adatok betöltése (koncertek és képek listázása törlés opcióval)
+// Admin adatok betöltése
 async function loadAdminData() {
     loadAdminEvents();
     loadAdminPhotos();
@@ -45,7 +49,7 @@ async function loadAdminEvents() {
     const listEl = document.getElementById('events-list');
     if (!listEl) return;
 
-    const snapshot = await rtdb.ref('events').once('value');
+    const snapshot = await window.rtdb.ref('events').once('value');
     const data = snapshot.val();
     let html = '<h3>Működő koncertek:</h3>';
 
@@ -70,7 +74,7 @@ async function loadAdminPhotos() {
     const listEl = document.getElementById('photos-list');
     if (!listEl) return;
 
-    const snapshot = await rtdb.ref('photos').once('value');
+    const snapshot = await window.rtdb.ref('photos').once('value');
     const data = snapshot.val();
     let html = '<h3>Feltöltött képek:</h3>';
 
@@ -92,7 +96,7 @@ async function loadAdminPhotos() {
 }
 
 // Koncert mentés
-function handleEventSubmit(e) {
+window.handleEventSubmit = function(e) {
     e.preventDefault();
     const title = document.getElementById('ev-title').value;
     const location = document.getElementById('ev-location').value;
@@ -100,40 +104,40 @@ function handleEventSubmit(e) {
     const endtime = document.getElementById('ev-endtime').value;
     const id = 'ev_' + Date.now();
 
-    rtdb.ref('events/' + id).set({
+    window.rtdb.ref('events/' + id).set({
         title, location, datetime, endtime
     }).then(() => {
         alert("Koncert sikeresen mentve!");
         e.target.reset();
         loadAdminEvents();
     });
-}
+};
 
 // Kép mentés
-function handlePhotoSubmit(e) {
+window.handlePhotoSubmit = function(e) {
     e.preventDefault();
     const url = document.getElementById('ph-url').value;
     const caption = document.getElementById('ph-caption').value;
     const id = 'ph_' + Date.now();
 
-    rtdb.ref('photos/' + id).set({
+    window.rtdb.ref('photos/' + id).set({
         url, caption
     }).then(() => {
         alert("Kép sikeresen hozzáadva!");
         e.target.reset();
         loadAdminPhotos();
     });
-}
+};
 
 // Törlések
 window.deleteEvent = function(id) {
     if (confirm("Biztosan törlöd ezt a koncertet?")) {
-        rtdb.ref('events/' + id).remove().then(() => { loadAdminEvents(); });
+        window.rtdb.ref('events/' + id).remove().then(() => { loadAdminEvents(); });
     }
-}
+};
 
 window.deletePhoto = function(id) {
     if (confirm("Biztosan törlöd ezt a képet?")) {
-        rtdb.ref('photos/' + id).remove().then(() => { loadAdminPhotos(); });
+        window.rtdb.ref('photos/' + id).remove().then(() => { loadAdminPhotos(); });
     }
-}
+};
